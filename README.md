@@ -1,270 +1,74 @@
-# 💧 Water Potability Prediction using Machine Learning
+Water Potability Prediction
 
-## 📌 Project Overview
+A machine learning pipeline that predicts whether a water sample is safe to drink (potable) from nine water-quality measurements. It covers cleaning, class-imbalance handling with SMOTE, comparison of five classifiers, hyperparameter tuning, and a Streamlit app for predictions.
 
-This project aims to predict whether water is **safe for human consumption (Potable)** or **unsafe (Non-Potable)** using Machine Learning. Various water quality parameters such as pH, Hardness, Sulfate, Conductivity, Turbidity, and others are used to train multiple classification models.
+Key result
 
-The project includes:
-- Exploratory Data Analysis (EDA)
-- Data Preprocessing
-- Handling Missing Values
-- Handling Class Imbalance using SMOTE
-- Model Training & Evaluation
-- Hyperparameter Tuning
-- Feature Importance Analysis
-- Streamlit Web Application Deployment
+Final model: Random Forest (tuned), evaluated on a stratified held-out test set of 656 samples.
 
----
+Metric	Value
+Accuracy	0.637
+Precision (potable)	0.539
+Recall (potable)	0.484
+F1 (potable)	0.510
 
-# 📂 Dataset Information
+Tuned models on the same test set:
 
-The dataset contains **3276 water samples** with **9 water quality features** and **1 target variable**.
+Model	Accuracy	Precision	Recall	F1
+Random Forest	0.637	0.539	0.484	0.510
+XGBoost	0.627	0.523	0.488	0.505
+SVM (RBF)	0.578	0.464	0.527	0.494
 
-### Features
+Context: this dataset has a weak signal. No single feature has a correlation above 0.1 with potability, so every model lands in the low-to-mid 60s for accuracy. The goal here is a sound, leak-aware workflow rather than a high headline number.
 
-- pH
-- Hardness
-- Solids
-- Chloramines
-- Sulfate
-- Conductivity
-- Organic Carbon
-- Trihalomethanes
-- Turbidity
+Dataset
+3,276 samples, 9 features plus the target Potability (1 = potable, 0 = not).
+Features: ph, Hardness, Solids, Chloramines, Sulfate, Conductivity, Organic_carbon, Trihalomethanes, Turbidity.
+Class balance: 61% non-potable, 39% potable.
+Missing values: ph (491), Sulfate (781), Trihalomethanes (162). No duplicates.
+What the project does
+EDA: feature distributions, boxplots, class-wise comparisons and a correlation heatmap. Outliers were kept because they plausibly reflect real extreme measurements.
+Preprocessing: mean imputation for the three columns with missing values (distributions were checked before and after), stratified train/test split, StandardScaler fit on the training data only.
+Imbalance handling: SMOTE applied to the training set only, after the split, so no synthetic samples reach the test set.
+Modelling: KNN, Decision Tree, SVM, Random Forest and XGBoost; the top three were tuned with GridSearchCV (Random Forest, SVM) and RandomizedSearchCV (XGBoost).
+Evaluation: accuracy, precision, recall, F1, confusion matrices and ROC curves on the held-out test set.
+Feature importance: Solids, Sulfate and pH rank highest in the Random Forest; Conductivity and Turbidity rank lowest.
+Deployment: the trained model and scaler are saved with joblib and used by a Streamlit app.
+SMOTE vs. no SMOTE
+Tuned model	Setup	Accuracy	Recall (potable)	F1
+Random Forest	with SMOTE	0.637	0.484	0.510
+Random Forest	without SMOTE	0.654	0.328	0.425
+XGBoost	with SMOTE	0.627	0.488	0.505
+XGBoost	without SMOTE	0.659	0.324	0.426
 
-### Target Variable
+SMOTE costs a little accuracy and precision but raises recall on potable samples from about 0.33 to about 0.49 and lifts F1 by roughly 0.08. For a water-safety use case, recall and the type of error matter more than raw accuracy.
 
-- **0 → Non-Potable**
-- **1 → Potable**
-
----
-
-# 📊 Exploratory Data Analysis (EDA)
-
-The following analyses were performed:
-
-- Dataset Overview
-- Missing Value Analysis
-- Statistical Summary
-- Univariate Analysis
-- Bivariate Analysis
-- Correlation Analysis
-- Outlier Detection
-- Target Variable Distribution
-
-### Key Findings
-
-- Missing values were found in **pH**, **Sulfate**, and **Trihalomethanes**.
-- Most features are approximately normally distributed.
-- The dataset is moderately imbalanced.
-- No feature showed strong correlation with the target variable.
-- Outliers appear to represent genuine water quality measurements and were retained.
-
----
-
-# ⚙️ Data Preprocessing
-
-The following preprocessing steps were applied:
-
-- Missing values filled using Mean Imputation
-- Train-Test Split
-- Class balancing using **SMOTE**
-- Feature Scaling using **StandardScaler**
-
----
-
-# 🤖 Machine Learning Models
-
-The following models were trained and evaluated:
-
-- K-Nearest Neighbors (KNN)
-- Decision Tree
-- Support Vector Machine (SVM)
-- Random Forest
-- XGBoost
-
----
-
-# 🔄 Cross Validation
-
-Cross Validation was performed to evaluate model stability before hyperparameter tuning.
-
----
-
-# 🎛 Hyperparameter Tuning
-
-The best-performing models were optimized using:
-
-- GridSearchCV
-- RandomizedSearchCV
-
-Optimized Models:
-
-- Random Forest
-- Support Vector Machine
-- XGBoost
-
----
-
-# 📈 Model Evaluation
-
-The models were evaluated using:
-
-- Accuracy
-- Precision
-- Recall
-- F1 Score
-- ROC Curve
-- AUC Score
-- Confusion Matrix
-- Classification Report
-
----
-
-# ⭐ Best Model
-
-The **Random Forest Classifier** achieved the best overall performance after hyperparameter tuning.
-
-Performance was evaluated based on:
-
-- Accuracy
-- Precision
-- Recall
-- F1 Score
-- Cross Validation Score
-
----
-
-# 🌟 Feature Importance
-
-Feature importance was analyzed using the Random Forest model to identify the most influential water quality parameters affecting potability prediction.
-
----
-
-# 💻 Streamlit Web Application
-
-A Streamlit application was developed to allow users to predict water potability by entering water quality parameters.
-
-### Features
-
-- User-friendly interface
-- Manual feature input
-- Sample Potable Data
-- Sample Non-Potable Data
-- Prediction Confidence
-
----
-
-# 📁 Project Structure
-
-Water Potability Project
-│
-├── analysis.ipynb
-├── app.py
-├── water_potability.csv
-├── scaler.pkl
-├── water_potability_model.pkl
-├── requirements.txt
-├── README.md
-│
-├── images
-│   ├── Boxplots of Water Quality Features.png
-│   ├── Confusion_matrices.png
-│   ├── Correlation Analysis of All Features.png
-│   ├── Distribution of 'ph', 'Sulfate', 'Trihalomethanes' after mean imputation.png
-│   ├── Distribution of Additional Water Quality Features by Potability.png
-│   ├── Distribution of Selected Water Quality Features by Potability.png
-│   ├── Distribution of Water Quality Features.png
-│   ├── Feature_importance - Random Forest.png
-│   └── roc_curves.png
-│
-└── WaterPotability_Report.docx
-
-
-## ▶️ How to Run the Project
-
-### Step 1: Download or Copy the Project Folder
-
-Ensure the project folder contains the following files:
-
-```
-analysis.ipynb
-app.py
-water_potability.csv
-water_potability_model.pkl
-scaler.pkl
-requirements.txt
-```
-
----
-
-### Step 2: Install the Required Libraries
-
-Open a terminal or command prompt inside the project folder and run:
-
-```bash
+Limitations
+Weak features. The measurements only loosely separate potable from non-potable samples, which caps what any model can achieve here.
+Tuning did not improve test accuracy. The default Random Forest scored 0.652 accuracy on the test set, slightly above the tuned model's 0.637. The tuned model was kept because it was selected on cross-validation and has stronger precision/recall balance.
+Cross-validation was run on SMOTE-resampled training data, which lets synthetic samples leak across folds and makes CV scores (about 0.70) optimistic. The held-out test figures above are the reliable ones. A cleaner setup would apply SMOTE inside each fold with an imblearn Pipeline.
+A single train/test split on 3,276 samples gives noisy estimates; differences of a point or two between models are not meaningful.
+Future work
+Move SMOTE inside a cross-validation Pipeline and report cross-validated metrics from it.
+Tune the decision threshold for higher recall on potable samples.
+Try gradient boosting variants and report confidence intervals via repeated cross-validation.
+How to run
+bash
+git clone https://github.com/UmarIntakhab/water-potability-prediction.git
+cd water-potability-prediction
 pip install -r requirements.txt
-```
+jupyter notebook
 
-This will install all the required Python libraries.
+Open the notebook and run all cells top to bottom. It reads water_potability.csv from the same folder and saves the model (water_potability_model.pkl) and scaler (scaler.pkl).
 
----
+To launch the Streamlit app (if app.py is in the repo):
 
-### Step 3: Run the Streamlit Application
-
-In the terminal, execute:
-
-```bash
+bash
 streamlit run app.py
-```
+Tech stack
 
----
+Python · Pandas · NumPy · Scikit-learn · XGBoost · imbalanced-learn (SMOTE) · Streamlit · Matplotlib · Seaborn · Joblib
 
-### Step 4: Open the Application
+Author
 
-After running the above command, Streamlit will automatically open the application in your default web browser.
-
-If it does not open automatically, copy and paste the Local URL displayed in the terminal (usually `http://localhost:8501`) into your browser.
-
----
-
-### System Requirements
-
-* Python 3.10 or later
-* Internet connection (only required for installing libraries)
-* A modern web browser (Chrome, Edge, Firefox, etc.)
-
----
-
-# 📦 Required Libraries
-
-- Python
-- Pandas
-- NumPy
-- Matplotlib
-- Seaborn
-- Scikit-Learn
-- XGBoost
-- Imbalanced-Learn
-- Joblib
-- Streamlit
-
----
-
-# 🎯 Future Improvements
-
-- Collect more training data
-- Improve prediction accuracy using additional features
-- Deploy the application to the cloud
-- Integrate real-time water quality sensors
-- Explore deep learning models for comparison
-
----
-
-# 👨‍💻 Author
-
-**Umar**
-
-This project was developed as part of the **Machine Learning & AI Diploma Program** at **BIA Institute**.
-
-The project demonstrates an end-to-end machine learning workflow, including data preprocessing, model development, evaluation, hyperparameter tuning, and deployment using Streamlit.
+Umar Intakhab: BCA graduate, Jamia Hamdard University. Contact: umarintakhab1976@gmail.com
